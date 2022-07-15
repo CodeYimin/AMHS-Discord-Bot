@@ -1,6 +1,6 @@
 import { CommandInteraction, MessageEmbed, User } from "discord.js";
 import { Discord, Slash, SlashOption } from "discordx";
-import { prisma } from "../database/prisma";
+import { createOrGetUserById } from "../utils/database";
 
 @Discord()
 class Profile {
@@ -15,30 +15,20 @@ class Profile {
 
     interaction: CommandInteraction
   ) {
-    const profile = await prisma.user.findUnique({
-      where: {
-        id: user?.id || interaction.user.id,
-      },
-    });
-
-    if (!profile) {
-      const messageEmbed = new MessageEmbed({
-        title: "No profile found",
-        description: `<@${
-          user?.id || interaction.user.id
-        }> did not register an AMHS profile.`,
-      });
-
-      await interaction.reply({ embeds: [messageEmbed] });
-      return;
-    }
+    const profile = await createOrGetUserById(user?.id || interaction.user.id);
 
     const messageEmbed = new MessageEmbed()
-      .setTitle(profile.fullName)
-      .addField("Discord User", `<@${profile.id}>`, true)
-      .addField("Status", profile.graduated ? "Alum" : "Student", true);
+      .setTitle(profile.fullName || user?.username || interaction.user.username)
+      .addField("Discord User", `<@${profile.id}>`, true);
 
-    if (profile.grade) {
+    if (profile.graduated !== null) {
+      messageEmbed.addField(
+        "Status",
+        profile.graduated ? "Alum" : "Student",
+        true
+      );
+    }
+    if (profile.grade !== null) {
       messageEmbed.addField("Grade", profile.grade.toString(), true);
     }
     if (profile.teacher1) {

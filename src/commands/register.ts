@@ -20,28 +20,16 @@ class Register {
     grade: number,
     interaction: CommandInteraction
   ) {
-    const existingUser = await prisma.user.findUnique({
-      where: { id: interaction.user.id },
-    });
-    if (existingUser) {
-      const messageEmbed = new MessageEmbed({
-        title: "Error",
-        description: "You are already registered.",
-      });
-      await interaction.reply({
-        embeds: [messageEmbed],
-        ephemeral: true,
-      });
-      return;
-    }
-
     const graduated = grade === -1;
     const modalResponse = graduated
       ? await useAlumModal(interaction)
       : await useStudentModal(interaction);
-    const newUser = await prisma.user.create({
-      data: {
+    const updatedUser = await prisma.user.upsert({
+      where: { id: interaction.user.id },
+      create: {
         id: interaction.user.id,
+      },
+      update: {
         fullName: modalResponse.fields.fullName,
         graduated: graduated,
         grade: graduated ? undefined : grade,
@@ -52,14 +40,18 @@ class Register {
       },
     });
 
-    const messageEmbed = new MessageEmbed({
-      title: "Success",
-      description: `${newUser.fullName}, you are now registered as an AMHS ${
-        newUser.graduated ? "Alum" : "Student"
-      }!`,
+    await modalResponse.interaction.reply({
+      embeds: [
+        new MessageEmbed({
+          title: "Success",
+          description: `${
+            updatedUser.fullName
+          }, you are now registered as an AMHS ${
+            updatedUser.graduated ? "Alum" : "Student"
+          }!`,
+        }),
+      ],
     });
-
-    await modalResponse.interaction.reply({ embeds: [messageEmbed] });
   }
 }
 

@@ -15,8 +15,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  fullName  String
-  graduated Boolean
+  fullName  String?
+  graduated Boolean?
   grade     Int?
   teacher1  String?
   teacher2  String?
@@ -86,9 +86,8 @@ model Report {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  reportedMessageId      String
-  reportedMessageContent String
-
   reportedUser   User   @relation("Reported", fields: [reportedUserId], references: [id])
   reportedUserId String
+
+  content String
 }
