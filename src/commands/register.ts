@@ -1,9 +1,4 @@
-import { User } from "@prisma/client";
-import {
-  CommandInteraction,
-  MessageEmbed,
-  ModalSubmitInteraction,
-} from "discord.js";
+import { CommandInteraction, MessageEmbed } from "discord.js";
 import { Discord, Slash, SlashChoice, SlashOption } from "discordx";
 import { prisma } from "../database/prisma";
 import { useModal } from "../utils/modalUtils";
@@ -31,7 +26,7 @@ class Register {
     if (existingUser) {
       const messageEmbed = new MessageEmbed({
         title: "Error",
-        description: "You are already registered",
+        description: "You are already registered.",
       });
       await interaction.reply({
         embeds: [messageEmbed],
@@ -40,38 +35,22 @@ class Register {
       return;
     }
 
-    let newUser: User;
-    let modalInteraction: ModalSubmitInteraction;
-
     const graduated = grade === -1;
-    if (graduated) {
-      const modalResponse = await useAlumModal(interaction);
-      modalInteraction = modalResponse.interaction;
-
-      newUser = await prisma.user.create({
-        data: {
-          id: interaction.user.id,
-          fullName: modalResponse.fields.fullName,
-          graduated: true,
-        },
-      });
-    } else {
-      const modalResponse = await useStudentModal(interaction);
-      modalInteraction = modalResponse.interaction;
-
-      newUser = await prisma.user.create({
-        data: {
-          id: interaction.user.id,
-          fullName: modalResponse.fields.fullName,
-          graduated: false,
-          grade: grade,
-          teacher1: modalResponse.fields.teacher1 || undefined,
-          teacher2: modalResponse.fields.teacher2 || undefined,
-          teacher3: modalResponse.fields.teacher3 || undefined,
-          teacher4: modalResponse.fields.teacher4 || undefined,
-        },
-      });
-    }
+    const modalResponse = graduated
+      ? await useAlumModal(interaction)
+      : await useStudentModal(interaction);
+    const newUser = await prisma.user.create({
+      data: {
+        id: interaction.user.id,
+        fullName: modalResponse.fields.fullName,
+        graduated: graduated,
+        grade: graduated ? undefined : grade,
+        teacher1: modalResponse.fields.teacher1 || undefined,
+        teacher2: modalResponse.fields.teacher2 || undefined,
+        teacher3: modalResponse.fields.teacher3 || undefined,
+        teacher4: modalResponse.fields.teacher4 || undefined,
+      },
+    });
 
     const messageEmbed = new MessageEmbed({
       title: "Success",
@@ -80,7 +59,7 @@ class Register {
       }!`,
     });
 
-    await modalInteraction.reply({ embeds: [messageEmbed] });
+    await modalResponse.interaction.reply({ embeds: [messageEmbed] });
   }
 }
 

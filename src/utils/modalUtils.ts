@@ -62,7 +62,7 @@ export interface UseModalOptions<T extends string> {
 
 export interface UseModalResponse<T extends string> {
   interaction: ModalSubmitInteraction;
-  fields: Record<T, string>;
+  fields: Record<T, string> & Record<string, string | undefined>;
 }
 
 export async function useModal<T extends string>({
