@@ -10,7 +10,85 @@ datasource db {
   url      = "file:./bot.db"
 }
 
-model Message {
-  id      String @id
+model User {
+  id        String   @id
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  fullName  String
+  graduated Boolean
+  grade     Int?
+  teacher1  String?
+  teacher2  String?
+  teacher3  String?
+  teacher4  String?
+
+  createdEvents      Event[]      @relation("Creator")
+  privateEvents      Event[]      @relation("Permitted")
+  createdSuggestions Suggestion[] @relation("Creator")
+  reportsAgainstUser Report[]     @relation("Reported")
+}
+
+model Event {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  creator   User   @relation("Creator", fields: [creatorId], references: [id])
+  creatorId String
+
+  private        Boolean
+  permittedUsers User[]  @relation("Permitted")
+
+  name        String
+  description String
+  dateTime    DateTime
+}
+
+model AutoResponse {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name         String
+  description  String
+  triggerRegex String
+  response     String
+}
+
+model WelcomeMessage {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   content String
+}
+
+model Suggestion {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  creator   User   @relation("Creator", fields: [creatorId], references: [id])
+  creatorId String
+
+  content   String
+  upvotes   Int
+  downvotes Int
+
+  messageId String // The message the bot sent, used to track emoji reactions on message
+  approved  Boolean @default(false)
+  rejected  Boolean @default(false)
+}
+
+model Report {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reportedMessageId      String
+  reportedMessageContent String
+
+  reportedUser   User   @relation("Reported", fields: [reportedUserId], references: [id])
+  reportedUserId String
 }

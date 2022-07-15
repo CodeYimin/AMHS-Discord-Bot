@@ -34,6 +34,9 @@ async function start() {
 
   // Setup discordx interaction handlers
   client.on("interactionCreate", (interaction) => {
+    if (interaction.isModalSubmit()) {
+      return;
+    }
     client.executeInteraction(interaction);
   });
 
