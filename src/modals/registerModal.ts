@@ -6,12 +6,9 @@ import { NumberModalStateType } from "./modalStateTypes";
 export const studentRegisterModal = new Modal({
   id: "StudentRegistration",
   defaultTitle: "Student Registration",
-  stateFields: [
-    {
-      name: "grade",
-      type: NumberModalStateType(),
-    },
-  ],
+  stateFields: {
+    grade: NumberModalStateType(),
+  },
   userInputFields: [
     {
       customId: "fullName",
@@ -48,10 +45,10 @@ export const studentRegisterModal = new Modal({
         graduated: false,
         grade: response.state.grade,
         fullName: response.userInput.fullName,
-        teacher1: response.userInput.teacher1,
-        teacher2: response.userInput.teacher2,
-        teacher3: response.userInput.teacher3,
-        teacher4: response.userInput.teacher4,
+        teacher1: response.userInput.teacher1 || null,
+        teacher2: response.userInput.teacher2 || null,
+        teacher3: response.userInput.teacher3 || null,
+        teacher4: response.userInput.teacher4 || null,
       },
     });
 
@@ -69,7 +66,6 @@ export const studentRegisterModal = new Modal({
 export const alumRegisterModal = new Modal({
   id: "AlumRegistration",
   defaultTitle: "Alum Registration",
-  stateFields: null,
   userInputFields: [
     {
       customId: "fullName",
@@ -84,7 +80,12 @@ export const alumRegisterModal = new Modal({
       create: { id: response.interaction.user.id },
       update: {
         graduated: true,
+        grade: null,
         fullName: response.userInput.fullName,
+        teacher1: null,
+        teacher2: null,
+        teacher3: null,
+        teacher4: null,
       },
     });
 

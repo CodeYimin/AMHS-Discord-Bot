@@ -41,7 +41,7 @@ async function start() {
   // Setup discordx interaction handlers
   client.on("interactionCreate", (interaction) => {
     if (interaction.isModalSubmit()) {
-      const modalHandlers: Modal<any, any, any, any>[] = [
+      const modalHandlers: Modal<any, any>[] = [
         studentRegisterModal,
         alumRegisterModal,
         reportModal,

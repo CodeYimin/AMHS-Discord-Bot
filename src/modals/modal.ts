@@ -8,7 +8,8 @@ import {
   TextInputComponent,
   TextInputComponentOptions,
 } from "discord.js";
-import { UnionToIntersect } from "../utils/types";
+import { Union } from "ts-toolbelt";
+import { Optional } from "ts-toolbelt/out/Object/Optional";
 
 export type ModalShowableInteraction =
   | BaseCommandInteraction
@@ -20,84 +21,65 @@ export interface ModalStateType<T> {
   decode: (data: string) => T | Promise<T>;
 }
 
-export interface ModalStateField<N extends string, T> {
-  name: N;
-  type: ModalStateType<T>;
-}
+export type StateField<T> = Record<string, ModalStateType<T>>;
+
+export type State<T extends StateField<unknown> | undefined> =
+  T extends undefined
+    ? undefined
+    : { [K in keyof T]: T[K] extends ModalStateType<infer I> ? I : never };
 
 export interface ModalUserInputField<
-  N extends Required<TextInputComponentOptions["customId"]>
+  Id extends Required<TextInputComponentOptions["customId"]>
 > extends TextInputComponentOptions {
-  customId: N;
+  customId: Id;
   label: Required<TextInputComponentOptions["label"]>;
   style: Required<TextInputComponentOptions["style"]>;
 }
 
 export interface ModalResponse<
-  SA extends S[] | null,
-  S extends ModalStateField<SN, unknown>,
-  SN extends string,
-  IN extends string
+  U extends string,
+  S extends StateField<unknown> | undefined
 > {
   interaction: ModalSubmitInteraction;
-  state: SA extends S[]
-    ? UnionToIntersect<
-        SA extends SA
-          ? Record<
-              SA[number]["name"],
-              SA[number]["type"] extends ModalStateType<infer I> ? I : never
-            >
-          : never
-      >
-    : null;
-  userInput: UnionToIntersect<IN extends IN ? Record<IN, string> : never>;
+  state: S extends undefined
+    ? undefined
+    : { [K in keyof S]: S[K] extends ModalStateType<infer I> ? I : never };
+  userInput: Union.IntersectOf<U extends U ? Record<U, string> : never>;
 }
 
 export interface ModalOptions<
-  SA extends S[] | null,
-  S extends ModalStateField<SN, unknown>,
-  SN extends string,
-  IN extends string
+  U extends string,
+  S extends StateField<unknown> | undefined
 > {
   id: string;
   defaultTitle: string;
-  stateFields: SA;
-  userInputFields: ModalUserInputField<IN>[];
-  onSubmit: (response: ModalResponse<SA, S, SN, IN>) => void | Promise<void>;
+  stateFields?: S;
+  userInputFields: ModalUserInputField<U>[];
+  onSubmit: (response: ModalResponse<U, S>) => void | Promise<void>;
 }
 
-export interface ModalShowOptions<
-  SA extends S[] | null,
-  S extends ModalStateField<SN, unknown>,
-  SN extends string
-> {
+export interface _ModalShowOptions<S extends StateField<unknown> | undefined> {
   interaction: ModalShowableInteraction;
-  state: SA extends S[]
-    ? UnionToIntersect<
-        SA extends SA
-          ? Record<
-              SA[number]["name"],
-              SA[number]["type"] extends ModalStateType<infer I> ? I : never
-            >
-          : never
-      >
-    : null;
   title?: string;
+  state: State<S>;
 }
+
+export type ModalShowOptions<S extends StateField<unknown> | undefined> =
+  S extends undefined
+    ? Optional<_ModalShowOptions<S>, "state">
+    : _ModalShowOptions<S>;
 
 export class Modal<
-  SA extends S[] | null,
-  S extends ModalStateField<SN, any>, // eslint-disable-line
-  SN extends string,
-  IN extends string
+  U extends string,
+  S extends Record<string, ModalStateType<any>> | undefined = undefined // eslint-disable-line
 > {
-  constructor(private options: ModalOptions<SA, S, SN, IN>) {}
+  constructor(private options: ModalOptions<U, S>) {}
 
-  async show({ interaction, state, title }: ModalShowOptions<SA, S, SN>) {
+  async show({ interaction, title, ...options }: ModalShowOptions<S>) {
     const encodedStateFields = this.options.stateFields
       ? await Promise.all(
-          this.options.stateFields.map(
-            (field) => field.type.encode((state as any)[field.name]) // eslint-disable-line
+          Object.entries(this.options.stateFields).map(([name, type]) =>
+            type.encode(options.state![name])
           )
         )
       : [];
@@ -125,25 +107,26 @@ export class Modal<
       return;
     }
 
-    let decodedState: ModalResponse<SA, S, SN, IN>["state"];
-    try {
-      decodedState = (
-        this.options.stateFields
-          ? (Object.fromEntries(
-              await Promise.all(
-                this.options.stateFields.map(
-                  async (field, index) =>
-                    [
-                      field.name,
-                      await field.type.decode(encodedStateFields[index]),
-                    ] as S extends S ? [S["name"], S["type"]] : never
-                )
-              )
-            ) as ModalResponse<SA, S, SN, IN>["state"])
-          : null
-      ) as ModalResponse<SA, S, SN, IN>["state"];
-    } catch (e) {
-      return;
+    let decodedState: ModalResponse<U, S>["state"];
+    if (this.options.stateFields) {
+      try {
+        /* eslint-disable */
+        decodedState = Object.fromEntries(
+          await Promise.all(
+            Object.entries(this.options.stateFields).map(
+              async ([name, type], index) => [
+                name,
+                await type.decode(encodedStateFields[index]),
+              ]
+            )
+          )
+        );
+        /* eslint-enable */
+      } catch (_) {
+        return;
+      }
+    } else {
+      decodedState = undefined as ModalResponse<U, S>["state"];
     }
 
     const userInput = Object.fromEntries(
@@ -151,7 +134,7 @@ export class Modal<
         component.components[0].customId,
         component.components[0].value || undefined,
       ])
-    ) as ModalResponse<SA, S, SN, IN>["userInput"];
+    ) as ModalResponse<U, S>["userInput"];
 
     await this.options.onSubmit({
       interaction,

@@ -6,12 +6,9 @@ import { UserModalStateType } from "./modalStateTypes";
 export const reportModal = new Modal({
   id: "Report",
   defaultTitle: "Anonymously Report User",
-  stateFields: [
-    {
-      name: "reportedUser",
-      type: UserModalStateType(),
-    },
-  ],
+  stateFields: {
+    reportedUser: UserModalStateType(),
+  },
   userInputFields: [
     {
       customId: "description",

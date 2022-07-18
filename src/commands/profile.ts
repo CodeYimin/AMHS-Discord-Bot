@@ -15,10 +15,11 @@ class Profile {
 
     interaction: CommandInteraction
   ) {
-    const profile = await createOrGetUserById(user?.id || interaction.user.id);
+    const targetUser = user || interaction.user;
+    const profile = await createOrGetUserById(targetUser.id);
 
     const messageEmbed = new MessageEmbed()
-      .setTitle(profile.fullName || user?.username || interaction.user.username)
+      .setTitle(profile.fullName || targetUser.username)
       .addField("Discord User", `<@${profile.id}>`, true);
 
     if (profile.graduated !== null) {

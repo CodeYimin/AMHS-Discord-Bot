@@ -25,7 +25,6 @@ class Register {
     if (graduated) {
       await alumRegisterModal.show({
         interaction,
-        state: null,
       });
     } else {
       await studentRegisterModal.show({
