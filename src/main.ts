@@ -4,6 +4,12 @@ import { Client } from "discordx";
 import "dotenv/config";
 import { DISCORD_ACTIVITY, DISCORD_INTENTS } from "./constants";
 import { MessageOnError } from "./guards/messageOnError";
+import { Modal } from "./modals/modal";
+import {
+  alumRegisterModal,
+  studentRegisterModal,
+} from "./modals/registerModal";
+import { reportModal } from "./modals/reportModal";
 import { startReplitKeepalive } from "./replit";
 
 startReplitKeepalive();
@@ -35,6 +41,14 @@ async function start() {
   // Setup discordx interaction handlers
   client.on("interactionCreate", (interaction) => {
     if (interaction.isModalSubmit()) {
+      const modalHandlers: Modal<any, any, any, any>[] = [
+        studentRegisterModal,
+        alumRegisterModal,
+        reportModal,
+      ]; // eslint-disable-line
+      modalHandlers.forEach((handler) => {
+        handler.processInteraction(interaction).catch(console.error);
+      });
       return;
     }
     client.executeInteraction(interaction);
