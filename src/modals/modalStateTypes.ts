@@ -24,7 +24,7 @@ export function NumberModalStateType(): ModalStateType<number> {
   };
 }
 
-export function UserModalStateType(): ModalStateType<User> {
+export function DbUserModalStateType(): ModalStateType<User> {
   return {
     encode: (data) => data.id,
     decode: async (data) => {

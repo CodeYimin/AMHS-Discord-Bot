@@ -17,7 +17,7 @@ model GuildConfig {
 
   welcomeChannelId     String?
   suggestionsChannelId String?
-  reportChannelsId     String?
+  reportsChannelId     String?
 }
 
 model User {
@@ -33,10 +33,10 @@ model User {
   teacher3  String?
   teacher4  String?
 
-  createdEvents      Event[]      @relation("Creator")
-  privateEvents      Event[]      @relation("Permitted")
-  createdSuggestions Suggestion[] @relation("Creator")
-  reportsAgainstUser Report[]     @relation("Reported")
+  createdEvents      Event[]      @relation("EventCreator")
+  privateEvents      Event[]      @relation("EventPermittedUser")
+  createdSuggestions Suggestion[] @relation("SuggestionCreator")
+  reportsAgainstUser Report[]     @relation("ReportedUser")
 }
 
 model Event {
@@ -44,11 +44,11 @@ model Event {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  creator   User   @relation("Creator", fields: [creatorId], references: [id])
+  creator   User   @relation("EventCreator", fields: [creatorId], references: [id])
   creatorId String
 
   private        Boolean
-  permittedUsers User[]  @relation("Permitted")
+  permittedUsers User[]  @relation("EventPermittedUser")
 
   name        String
   description String
@@ -79,14 +79,15 @@ model Suggestion {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  creator   User   @relation("Creator", fields: [creatorId], references: [id])
+  creator   User   @relation("SuggestionCreator", fields: [creatorId], references: [id])
   creatorId String
 
+  title     String
   content   String
-  upvotes   Int
-  downvotes Int
+  upvotes   Int    @default(0)
+  downvotes Int    @default(0)
 
-  messageId String // The message the bot sent, used to track emoji reactions on message
+  messageId String? // The message the bot sent, used to track emoji reactions on message
   approved  Boolean @default(false)
   rejected  Boolean @default(false)
 }
@@ -96,7 +97,7 @@ model Report {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  reportedUser   User   @relation("Reported", fields: [reportedUserId], references: [id])
+  reportedUser   User   @relation("ReportedUser", fields: [reportedUserId], references: [id])
   reportedUserId String
 
   content String

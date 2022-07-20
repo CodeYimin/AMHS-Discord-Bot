@@ -1,5 +1,6 @@
 import { ChannelType } from "discord.js";
 import { ArgsOf, Discord, On } from "discordx";
+import { prisma } from "../database/prisma";
 import { createOrGetGuildConfig } from "../utils/databaseUtils";
 
 @Discord()
@@ -18,6 +19,16 @@ class AutoWelcome {
       return;
     }
 
-    welcomeChannel.send;
+    const welcomeMessages = await prisma.welcomeMessage.findMany();
+    if (!welcomeMessages.length) {
+      return;
+    }
+
+    const welcomeMessage =
+      welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+
+    await welcomeChannel.send(
+      welcomeMessage.content.replace(/{user}/g, member.toString())
+    );
   }
 }

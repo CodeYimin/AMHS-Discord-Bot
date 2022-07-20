@@ -11,6 +11,7 @@ import {
   studentRegisterModal,
 } from "./modals/registerModal";
 import { reportModal } from "./modals/reportModal";
+import { suggestionModal } from "./modals/suggestionModal";
 import { startReplitKeepalive } from "./replit";
 
 startReplitKeepalive();
@@ -45,20 +46,30 @@ async function start() {
     console.log(`Logged in as ${client.user?.tag || ""}!`);
   });
 
-  // Setup discordx interaction handlers
   client.on("interactionCreate", (interaction) => {
+    // Setup modal handlers
     if (interaction.type === InteractionType.ModalSubmit) {
       const modalHandlers: Modal<any, any>[] = [
         studentRegisterModal,
         alumRegisterModal,
         reportModal,
-      ]; // eslint-disable-line
+        suggestionModal,
+      ];
+
       modalHandlers.forEach((handler) => {
         handler.processInteraction(interaction).catch(console.error);
       });
+
+      // Don't want discordx to handle modal interactions
       return;
     }
-    client.executeInteraction(interaction);
+
+    // Setup discordx interaction handlers
+    try {
+      client.executeInteraction(interaction);
+    } catch (e) {
+      console.error(e);
+    }
   });
 
   // Load all commands and event listeners
