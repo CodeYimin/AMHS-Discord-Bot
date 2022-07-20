@@ -1,4 +1,4 @@
-import { MessageEmbed } from "discord.js";
+import { ComponentType, EmbedBuilder, TextInputStyle } from "discord.js";
 import { prisma } from "../database/prisma";
 import { Modal } from "./modal";
 import { NumberModalStateType } from "./modalStateTypes";
@@ -13,28 +13,36 @@ export const studentRegisterModal = new Modal({
     {
       customId: "fullName",
       label: "Full Name",
-      style: "SHORT",
-      required: true,
+      style: TextInputStyle.Short,
+      type: ComponentType.TextInput,
     },
     {
+      required: false,
       customId: "teacher1",
       label: "Period 1 Teacher",
-      style: "SHORT",
+      style: TextInputStyle.Short,
+      type: ComponentType.TextInput,
     },
     {
+      required: false,
       customId: "teacher2",
       label: "Period 2 Teacher",
-      style: "SHORT",
+      style: TextInputStyle.Short,
+      type: ComponentType.TextInput,
     },
     {
+      required: false,
       customId: "teacher3",
       label: "Period 3 Teacher",
-      style: "SHORT",
+      style: TextInputStyle.Short,
+      type: ComponentType.TextInput,
     },
     {
+      required: false,
       customId: "teacher4",
       label: "Period 4 Teacher",
-      style: "SHORT",
+      style: TextInputStyle.Short,
+      type: ComponentType.TextInput,
     },
   ],
   onSubmit: async (response) => {
@@ -54,9 +62,9 @@ export const studentRegisterModal = new Modal({
 
     await response.interaction.reply({
       embeds: [
-        new MessageEmbed({
+        new EmbedBuilder({
           title: "Success",
-          description: `${updatedUser.fullName}, you are now registered as an AMHS Student!`,
+          description: `${updatedUser.fullName!}, you are now registered as an AMHS Student!`,
         }),
       ],
     });
@@ -70,8 +78,8 @@ export const alumRegisterModal = new Modal({
     {
       customId: "fullName",
       label: "Full Name",
-      style: "SHORT",
-      required: true,
+      style: TextInputStyle.Short,
+      type: ComponentType.TextInput,
     },
   ],
   onSubmit: async (response) => {
@@ -91,9 +99,9 @@ export const alumRegisterModal = new Modal({
 
     await response.interaction.reply({
       embeds: [
-        new MessageEmbed({
+        new EmbedBuilder({
           title: "Success",
-          description: `${updatedUser.fullName}, you are now registered as an AMHS Alum!`,
+          description: `${updatedUser.fullName!}, you are now registered as an AMHS Alum!`,
         }),
       ],
     });

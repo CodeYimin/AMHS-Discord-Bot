@@ -1,14 +1,17 @@
-import { MessageContextMenuInteraction } from "discord.js";
+import {
+  ApplicationCommandType,
+  MessageContextMenuCommandInteraction,
+} from "discord.js";
 import { ContextMenu, Discord } from "discordx";
 import { reportModal } from "../modals/reportModal";
-import { createOrGetUserById } from "../utils/database";
+import { createOrGetUser } from "../utils/databaseUtils";
 
 @Discord()
 class Report {
-  @ContextMenu("MESSAGE", "Report")
-  async messageHandler(interaction: MessageContextMenuInteraction) {
+  @ContextMenu(ApplicationCommandType.Message, "Report")
+  async messageHandler(interaction: MessageContextMenuCommandInteraction) {
     const reportedUser = interaction.targetMessage.author;
-    const reportedUserDb = await createOrGetUserById(reportedUser.id);
+    const reportedUserDb = await createOrGetUser(reportedUser.id);
 
     await reportModal.show({
       interaction,

@@ -1,4 +1,4 @@
-import { CommandInteraction } from "discord.js";
+import { ApplicationCommandOptionType, CommandInteraction } from "discord.js";
 import { Discord, Slash, SlashChoice, SlashOption } from "discordx";
 import {
   alumRegisterModal,
@@ -15,7 +15,7 @@ class Register {
     @SlashChoice({ name: "Grade 12", value: 12 })
     @SlashChoice({ name: "Alum", value: -1 })
     @SlashOption("grade", {
-      type: "INTEGER",
+      type: ApplicationCommandOptionType.Integer,
       description: "The grade you are currently in or going into.",
     })
     grade: number,

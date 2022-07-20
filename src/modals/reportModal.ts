@@ -1,4 +1,4 @@
-import { MessageEmbed } from "discord.js";
+import { ComponentType, EmbedBuilder, TextInputStyle } from "discord.js";
 import { prisma } from "../database/prisma";
 import { Modal } from "./modal";
 import { UserModalStateType } from "./modalStateTypes";
@@ -13,8 +13,8 @@ export const reportModal = new Modal({
     {
       customId: "description",
       label: "Describe the issue",
-      style: "PARAGRAPH",
-      required: true,
+      style: TextInputStyle.Paragraph,
+      type: ComponentType.TextInput,
     },
   ],
   onSubmit: async (response) => {
@@ -27,7 +27,7 @@ export const reportModal = new Modal({
 
     await response.interaction.reply({
       embeds: [
-        new MessageEmbed({
+        new EmbedBuilder({
           title: "Thank you for reporting!",
           fields: [
             {

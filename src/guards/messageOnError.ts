@@ -1,4 +1,4 @@
-import { CommandInteraction, MessageEmbed } from "discord.js";
+import { CommandInteraction, EmbedBuilder } from "discord.js";
 import { GuardFunction } from "discordx";
 import { ErrorMessages } from "../constants";
 import { replyOrFollowUp } from "../utils/messageUtils";
@@ -10,7 +10,7 @@ export const MessageOnError: GuardFunction<CommandInteraction> = (
 ) => {
   next().catch((error) => {
     console.error(error);
-    const failEmbed = new MessageEmbed({
+    const failEmbed = new EmbedBuilder({
       description: ErrorMessages.UNKNOWN_ERROR,
     });
 

@@ -1,11 +1,11 @@
-import { ActivityOptions, ClientOptions } from "discord.js";
+import { ActivityOptions, ActivityType, ClientOptions } from "discord.js";
 
 export const DISCORD_ACTIVITY: ActivityOptions = {
   name: "with a new discord bot",
-  type: "PLAYING",
+  type: ActivityType.Playing,
 };
 
 export const DISCORD_INTENTS: ClientOptions["intents"] = [
-  "GUILDS",
-  "GUILD_MESSAGES",
+  "Guilds",
+  "GuildMessages",
 ];

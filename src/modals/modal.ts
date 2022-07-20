@@ -1,19 +1,17 @@
 import {
-  BaseCommandInteraction,
-  ContextMenuInteraction,
-  MessageActionRow,
+  ActionRowBuilder,
+  APITextInputComponent,
+  CommandInteraction,
   MessageComponentInteraction,
-  Modal as DiscordModal,
+  ModalBuilder,
   ModalSubmitInteraction,
-  TextInputComponent,
-  TextInputComponentOptions,
+  TextInputBuilder,
 } from "discord.js";
 import { Union } from "ts-toolbelt";
 import { Optional } from "ts-toolbelt/out/Object/Optional";
 
 export type ModalShowableInteraction =
-  | BaseCommandInteraction
-  | ContextMenuInteraction
+  | CommandInteraction
   | MessageComponentInteraction;
 
 export interface ModalStateType<T> {
@@ -29,11 +27,11 @@ export type State<T extends StateField<unknown> | undefined> =
     : { [K in keyof T]: T[K] extends ModalStateType<infer I> ? I : never };
 
 export interface ModalUserInputField<
-  Id extends Required<TextInputComponentOptions["customId"]>
-> extends TextInputComponentOptions {
+  Id extends Required<APITextInputComponent["custom_id"]>
+> extends Omit<APITextInputComponent, "custom_id"> {
   customId: Id;
-  label: Required<TextInputComponentOptions["label"]>;
-  style: Required<TextInputComponentOptions["style"]>;
+  label: Required<APITextInputComponent["label"]>;
+  style: Required<APITextInputComponent["style"]>;
 }
 
 export interface ModalResponse<
@@ -41,9 +39,7 @@ export interface ModalResponse<
   S extends StateField<unknown> | undefined
 > {
   interaction: ModalSubmitInteraction;
-  state: S extends undefined
-    ? undefined
-    : { [K in keyof S]: S[K] extends ModalStateType<infer I> ? I : never };
+  state: S extends undefined ? undefined : State<S>;
   userInput: Union.IntersectOf<U extends U ? Record<U, string> : never>;
 }
 
@@ -58,7 +54,7 @@ export interface ModalOptions<
   onSubmit: (response: ModalResponse<U, S>) => void | Promise<void>;
 }
 
-export interface _ModalShowOptions<S extends StateField<unknown> | undefined> {
+interface _ModalShowOptions<S extends StateField<unknown> | undefined> {
   interaction: ModalShowableInteraction;
   title?: string;
   state: State<S>;
@@ -71,7 +67,7 @@ export type ModalShowOptions<S extends StateField<unknown> | undefined> =
 
 export class Modal<
   U extends string,
-  S extends Record<string, ModalStateType<any>> | undefined = undefined // eslint-disable-line
+  S extends StateField<any> | undefined = undefined
 > {
   constructor(private options: ModalOptions<U, S>) {}
 
@@ -84,13 +80,13 @@ export class Modal<
         )
       : [];
 
-    const discordModal = new DiscordModal({
+    const discordModal = new ModalBuilder({
       customId: this.options.id + ";" + encodedStateFields.join(";"),
       title: title || this.options.defaultTitle,
       components: this.options.userInputFields.map(
         (field) =>
-          new MessageActionRow<TextInputComponent>({
-            components: [new TextInputComponent(field)],
+          new ActionRowBuilder<TextInputBuilder>({
+            components: [new TextInputBuilder(field)],
           })
       ),
     });
@@ -130,9 +126,9 @@ export class Modal<
     }
 
     const userInput = Object.fromEntries(
-      interaction.components.map((component) => [
-        component.components[0].customId,
-        component.components[0].value || undefined,
+      this.options.userInputFields.map((field) => [
+        field.customId,
+        interaction.fields.getTextInputValue(field.customId),
       ])
     ) as ModalResponse<U, S>["userInput"];
 

@@ -1,12 +1,16 @@
 import {
-  BaseCommandInteraction,
+  CommandInteraction,
   InteractionReplyOptions,
   MessageComponentInteraction,
   MessagePayload,
+  ModalSubmitInteraction,
 } from "discord.js";
 
 export async function replyOrFollowUp(
-  interaction: BaseCommandInteraction | MessageComponentInteraction,
+  interaction:
+    | CommandInteraction
+    | MessageComponentInteraction
+    | ModalSubmitInteraction,
   options: string | MessagePayload | InteractionReplyOptions
 ): Promise<void> {
   if (interaction.replied) {

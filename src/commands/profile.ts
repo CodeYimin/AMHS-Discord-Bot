@@ -1,13 +1,18 @@
-import { CommandInteraction, MessageEmbed, User } from "discord.js";
+import {
+  ApplicationCommandOptionType,
+  CommandInteraction,
+  EmbedBuilder,
+  User,
+} from "discord.js";
 import { Discord, Slash, SlashOption } from "discordx";
-import { createOrGetUserById } from "../utils/database";
+import { createOrGetUser } from "../utils/databaseUtils";
 
 @Discord()
 class Profile {
   @Slash("profile", { description: "View your or someone else's AMHS profile" })
   async profile(
     @SlashOption("user", {
-      type: "USER",
+      type: ApplicationCommandOptionType.User,
       required: false,
       description: "The user to check the profile of. By default your own.",
     })
@@ -16,33 +21,53 @@ class Profile {
     interaction: CommandInteraction
   ) {
     const targetUser = user || interaction.user;
-    const profile = await createOrGetUserById(targetUser.id);
+    const profile = await createOrGetUser(targetUser.id);
 
-    const messageEmbed = new MessageEmbed()
+    const messageEmbed = new EmbedBuilder()
       .setTitle(profile.fullName || targetUser.username)
-      .addField("Discord User", `<@${profile.id}>`, true);
+      .addFields({
+        name: "Discord User",
+        value: `<@${profile.id}>`,
+        inline: true,
+      });
 
     if (profile.graduated !== null) {
-      messageEmbed.addField(
-        "Status",
-        profile.graduated ? "Alum" : "Student",
-        true
-      );
+      messageEmbed.addFields({
+        name: "Status",
+        value: profile.graduated ? "Alum" : "Student",
+        inline: true,
+      });
     }
     if (profile.grade !== null) {
-      messageEmbed.addField("Grade", profile.grade.toString(), true);
+      messageEmbed.addFields({
+        name: "Grade",
+        value: profile.grade.toString(),
+        inline: true,
+      });
     }
     if (profile.teacher1) {
-      messageEmbed.addField("Period 1 Teacher", profile.teacher1.toString());
+      messageEmbed.addFields({
+        name: "Period 1 Teacher",
+        value: profile.teacher1.toString(),
+      });
     }
     if (profile.teacher2) {
-      messageEmbed.addField("Period 2 Teacher", profile.teacher2.toString());
+      messageEmbed.addFields({
+        name: "Period 2 Teacher",
+        value: profile.teacher2.toString(),
+      });
     }
     if (profile.teacher3) {
-      messageEmbed.addField("Period 3 Teacher", profile.teacher3.toString());
+      messageEmbed.addFields({
+        name: "Period 3 Teacher",
+        value: profile.teacher3.toString(),
+      });
     }
     if (profile.teacher4) {
-      messageEmbed.addField("Period 4 Teacher", profile.teacher4.toString());
+      messageEmbed.addFields({
+        name: "Period 4 Teacher",
+        value: profile.teacher4.toString(),
+      });
     }
 
     await interaction.reply({ embeds: [messageEmbed] });

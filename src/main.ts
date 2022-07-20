@@ -1,5 +1,6 @@
 import { importx } from "@discordx/importer";
 import { NotBot } from "@discordx/utilities";
+import { InteractionType } from "discord.js";
 import { Client } from "discordx";
 import "dotenv/config";
 import { DISCORD_ACTIVITY, DISCORD_INTENTS } from "./constants";
@@ -28,8 +29,14 @@ async function start() {
   client.once("ready", async () => {
     // Register guild commands for development
     await client.guilds.fetch();
-    await client.initApplicationCommands();
-    await client.initApplicationPermissions();
+    await client.initApplicationCommands({
+      global: {
+        disable: {
+          add: true,
+        },
+      },
+      guild: {},
+    });
 
     // Set Discord activity
     client.user?.setActivity(DISCORD_ACTIVITY);
@@ -40,7 +47,7 @@ async function start() {
 
   // Setup discordx interaction handlers
   client.on("interactionCreate", (interaction) => {
-    if (interaction.isModalSubmit()) {
+    if (interaction.type === InteractionType.ModalSubmit) {
       const modalHandlers: Modal<any, any>[] = [
         studentRegisterModal,
         alumRegisterModal,
