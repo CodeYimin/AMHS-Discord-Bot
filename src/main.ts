@@ -5,6 +5,8 @@ import { Client } from "discordx";
 import "dotenv/config";
 import { DISCORD_ACTIVITY, DISCORD_INTENTS } from "./constants";
 import { MessageOnError } from "./guards/messageOnError";
+import { createEventModal } from "./modals/createEventModal";
+import { createResponderModal } from "./modals/createResponderModal";
 import { Modal } from "./modals/modal";
 import {
   alumRegisterModal,
@@ -54,6 +56,8 @@ async function start() {
         alumRegisterModal,
         reportModal,
         suggestionModal,
+        createResponderModal,
+        createEventModal,
       ];
 
       modalHandlers.forEach((handler) => {

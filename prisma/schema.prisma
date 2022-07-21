@@ -50,18 +50,18 @@ model Event {
   private        Boolean
   permittedUsers User[]  @relation("EventPermittedUser")
 
-  name        String
-  description String
-  dateTime    DateTime
+  name          String
+  description   String
+  startDateTime DateTime
+  endDateTime   DateTime
 }
 
-model AutoResponse {
+model AutoResponder {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   name         String
-  description  String
   triggerRegex String
   response     String
 }

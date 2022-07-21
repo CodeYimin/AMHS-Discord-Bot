@@ -8,4 +8,5 @@ export const DISCORD_ACTIVITY: ActivityOptions = {
 export const DISCORD_INTENTS: ClientOptions["intents"] = [
   "Guilds",
   "GuildMessages",
+  "MessageContent",
 ];
